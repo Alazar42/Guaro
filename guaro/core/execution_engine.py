@@ -84,8 +84,10 @@ class ExecutionEngine:
                 if cfg is None or getattr(cfg, "engine", None) == DatabaseEngine.MEMORY:
                     adapter = MemoryAdapter(self.registry)
                 else:
-                    # Fallback to memory adapter until other adapters implemented
-                    adapter = MemoryAdapter(self.registry)
+                    # Use SQLAdapter for relational engines
+                    from guaro.db.adapters.sql_adapter import SQLAdapter
+
+                    adapter = SQLAdapter(self.registry, cfg.url)
 
                 repo = Repository(adapter)
                 outcome = await repo.find(ir)
