@@ -5,18 +5,91 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "guaro"
 version = "0.1.0"
-description = "Guaro is a unified REST + GraphQL API framework built on one registry and one execution engine."
+description = "Guaro: Unified REST + GraphQL framework with auto-migration and multi-database support"
 readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.11"
+authors = [
+  { name = "Mickyas Tesfaye", email = "alazar42@github.com" }
+]
+keywords = [
+  "framework",
+  "rest",
+  "graphql",
+  "api",
+  "starlette",
+  "strawberry",
+  "database",
+  "orm"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Web Environment",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Internet :: WWW/HTTP",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
   "starlette>=0.37",
   "strawberry-graphql>=0.245",
+  "sqlalchemy>=2.0",
   "uvicorn>=0.30",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Alazar42/Guaro"
+Repository = "https://github.com/Alazar42/Guaro.git"
+Documentation = "https://github.com/Alazar42/Guaro/blob/main/docs/README.md"
+Changelog = "https://github.com/Alazar42/Guaro/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/Alazar42/Guaro/issues"
+
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+sqlite = ["aiosqlite>=0.17"]
+postgres = ["asyncpg>=0.29"]
+mysql = ["aiomysql>=0.2"]
+mongodb = ["motor>=3.3"]
+all-databases = [
+  "aiosqlite>=0.17",
+  "asyncpg>=0.29",
+  "aiomysql>=0.2",
+  "motor>=3.3"
+]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.23",
+  "black>=24.0",
+  "pylint>=3.0",
+  "mypy>=1.0"
+]
 
 [tool.setuptools.packages.find]
 include = ["guaro*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+extend-exclude = '''
+/(
+  \.git
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.pylint]
+max-line-length = 100
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
 

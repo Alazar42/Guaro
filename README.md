@@ -21,9 +21,25 @@ A powerful, async-first Python framework for building REST & GraphQL APIs with a
 
 ### Installation
 
+Install the latest version from PyPI:
+
 ```bash
+# Basic installation with SQLite support
 pip install guaro
+
+# With specific database support
+pip install "guaro[postgres]"     # PostgreSQL
+pip install "guaro[mysql]"        # MySQL
+pip install "guaro[mongodb]"      # MongoDB
+pip install "guaro[all-databases]" # All databases
+
+# Development version from source
+git clone https://github.com/Alazar42/Guaro.git
+cd Guaro
+pip install -e ".[all-databases,dev]"
 ```
+
+**See [Installation & Setup Guide](docs/INSTALLATION.md) for detailed setup instructions and environment configuration.**
 
 ### Basic Example
 
@@ -73,21 +89,34 @@ if __name__ == "__main__":
 
 ## 📚 Documentation
 
-Full documentation available in the [docs/](docs/) directory:
+Full documentation available at [docs/README.md](docs/README.md) with learning paths and guides:
 
-- [Installation & Setup](docs/INSTALLATION.md) - Get started with Guaro
-- [Model Definition](docs/MODELS.md) - Define your data models
-- [Router & Routes](docs/ROUTING.md) - Create REST endpoints
-- [Database Configuration](docs/DATABASE.md) - Configure database connections
-- [Auto-Migration](docs/MIGRATION.md) - Automatic schema management
-- [GraphQL](docs/GRAPHQL.md) - Use GraphQL with Guaro
-- [Middleware & Auth](docs/MIDDLEWARE.md) - Authentication and authorization
-- [Dependency Injection](docs/DEPENDENCY_INJECTION.md) - Advanced DI patterns
-- [Developer Guide](docs/DEVELOPMENT.md) - Contribute to Guaro
+### Getting Started
+- **[Installation & Setup](docs/INSTALLATION.md)** - Installation methods (pip, clone, Poetry)
+- **[Quick Start Tutorial](docs/INSTALLATION.md#quick-setup-walkthrough)** - Build your first API in 5 minutes
 
-## 📖 Tutorial
+### Core Concepts
+- **[Models & Data](docs/MODELS.md)** - Define models with relationships
+- **[REST Routing](docs/ROUTING.md)** - Create REST endpoints
+- **[Database Configuration](docs/DATABASE.md)** - All supported databases
+- **[GraphQL](docs/GRAPHQL.md)** - GraphQL schema and queries
 
-Start with the [Installation Guide](docs/INSTALLATION.md) then work through the examples/
+### Advanced Topics
+- **[Middleware & Authentication](docs/MIDDLEWARE.md)** - Security and authorization
+- **[Dependency Injection](docs/DEPENDENCY_INJECTION.md)** - Service management
+- **[Developer Guide](docs/DEVELOPMENT.md)** - Architecture and testing
+
+### Contributing & Deployment
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to Guaro
+- **[Development Setup](DEVELOPMENT_SETUP.md)** - Local development environment
+- **[Publishing Guide](PUBLISH.md)** - Deploying to PyPI
+- **[Changelog](CHANGELOG.md)** - Version history and roadmap
+
+## 🛠️ To Get Started
+
+1. **Users**: Follow the [Installation & Setup](docs/INSTALLATION.md) guide
+2. **Developers**: See [Development Setup](DEVELOPMENT_SETUP.md) for cloning and local setup
+3. **Contributors**: Read [Contributing Guide](CONTRIBUTING.md) and [Developer Guide](docs/DEVELOPMENT.md)/
 ├── middleware/
 └── guaro/
 ```
