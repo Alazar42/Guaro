@@ -40,11 +40,41 @@ class API:
 
         try:
             from starlette.applications import Starlette
-            from starlette.routing import Mount
+            from starlette.routing import Mount, Route
+            from starlette.responses import HTMLResponse, JSONResponse
         except ImportError as exc:  # pragma: no cover - optional dependency guard
             raise RuntimeError("Starlette is required to build a hybrid app") from exc
 
-        return Starlette(routes=[Mount("/graphql", app=graphql_app), Mount("/", app=rest_app)])
+        from guaro.openapi.generator import generate_openapi
+
+        async def openapi_json_endpoint(request):
+            return JSONResponse(generate_openapi(self.registry))
+
+        async def docs_endpoint(request):
+            html = """
+<!doctype html>
+<html>
+  <head>
+    <title>Guaro Swagger UI</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@4/swagger-ui.css" />
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@4/swagger-ui-bundle.js"></script>
+    <script>
+      const ui = SwaggerUIBundle({ url: '/openapi.json', dom_id: '#swagger-ui' });
+    </script>
+  </body>
+</html>
+"""
+            return HTMLResponse(html)
+
+        return Starlette(routes=[
+            Route("/openapi.json", endpoint=openapi_json_endpoint, methods=["GET"]),
+            Route("/docs", endpoint=docs_endpoint, methods=["GET"]),
+            Mount("/graphql", app=graphql_app),
+            Mount("/", app=rest_app),
+        ])
 
     def run(self, mode: str = "hybrid", host: str = "127.0.0.1", port: int = 8000) -> Any:
         app = self.build(mode=mode)
