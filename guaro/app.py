@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from guaro.config import normalize_database_config
+from guaro.config.schema import NormalizedDatabaseConfig
 from guaro.core.execution_engine import ExecutionEngine
 from guaro.core.registry import Registry
 from guaro.core.schema import compile_model_schema
@@ -13,9 +15,15 @@ from guaro.rest.adapter import RestAdapter
 @dataclass(slots=True)
 class API:
     registry: Registry = field(default_factory=Registry)
+    database: Any = None  # Accepts dict, str, NormalizedDatabaseConfig, or None
     engine: ExecutionEngine = field(init=False)
+    db_config: NormalizedDatabaseConfig = field(init=False)
 
     def __post_init__(self) -> None:
+        # Normalize database config once at startup
+        self.db_config = normalize_database_config(self.database)
+        # Store in registry for adapters and repositories to access
+        self.registry.db_config = self.db_config
         self.engine = ExecutionEngine(self.registry)
 
     def register_model(self, model_cls: type[Any]) -> type[Any]:

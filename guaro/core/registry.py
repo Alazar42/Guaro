@@ -61,6 +61,7 @@ class Registry:
     loaders: dict[str, Any] = field(default_factory=dict)
     dependencies: dict[str, Any] = field(default_factory=dict)
     model_name_map: dict[type[Any], str] = field(default_factory=dict)
+    db_config: Any = None  # NormalizedDatabaseConfig set by API at initialization
 
     def register_model_metadata(self, metadata: ModelMetadata) -> None:
         self.models[metadata.name] = metadata

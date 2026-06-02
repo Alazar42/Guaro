@@ -9,6 +9,10 @@ from guaro.dependency.injector import DependencyInjector
 from guaro.execution.context import ExecutionContext
 from guaro.execution.pipeline import ExecutionPipeline
 from guaro.execution.planner import QueryPlan, build_query_plan
+from guaro.core.query_ir import QueryIR, RelationSelection
+from guaro.db.repository import Repository
+from guaro.db.adapters.memory_adapter import MemoryAdapter
+from guaro.config.schema import DatabaseEngine
 
 
 @dataclass(slots=True)
@@ -45,6 +49,58 @@ class ExecutionEngine:
             await pipeline.before(context)
             self._enforce_permissions(route, context)
             self._enforce_auth(route, context)
+
+            # If this route targets a model and is a GET, use Repository + QueryIR
+            if model_metadata is not None and route.method == "GET":
+                # build QueryIR from selection and params
+                ir = QueryIR(entity=model_metadata.name)
+                # fields
+                if context.selected_fields:
+                    ir.fields = list(context.selected_fields)
+                else:
+                    ir.fields = list(model_metadata.fields.keys())
+
+                # relations from context.field_tree
+                def build_relations(tree: dict[str, Any]) -> dict[str, RelationSelection]:
+                    rels: dict[str, RelationSelection] = {}
+                    for k, v in tree.items():
+                        sel = RelationSelection()
+                        sel.fields = list(v.get("fields", []))
+                        sel.relations = build_relations(v.get("relations", {}))
+                        rels[k] = sel
+                    return rels
+
+                ir.relations = build_relations(context.field_tree or {})
+
+                # params -> filters (support primary key lookup if id provided)
+                primary = model_metadata.primary_key
+                if primary in kwargs:
+                    ir.add_filter(primary, "==", kwargs[primary])
+                    ir.set_pagination(limit=1, offset=0)
+
+                # select adapter based on registry db_config
+                adapter = None
+                cfg = getattr(self.registry, "db_config", None)
+                if cfg is None or getattr(cfg, "engine", None) == DatabaseEngine.MEMORY:
+                    adapter = MemoryAdapter(self.registry)
+                else:
+                    # Fallback to memory adapter until other adapters implemented
+                    adapter = MemoryAdapter(self.registry)
+
+                repo = Repository(adapter)
+                outcome = await repo.find(ir)
+                # if single item requested, return single object
+                if ir.pagination.get("limit") == 1:
+                    outcome = outcome[0] if outcome else None
+
+                # serialize outcome if model metadata present
+                if model_metadata is not None:
+                    outcome = await self._serialize_result(outcome, model_metadata, context, plan)
+
+                await pipeline.after(context, outcome)
+                return ExecutionResult(data=outcome, plan=plan)
+
+            # default path: call resolver as before
             resolved_kwargs = await self.injector.resolve(route.resolver, context, kwargs)
             outcome = route.resolver(**resolved_kwargs)
             if inspect.isawaitable(outcome):
