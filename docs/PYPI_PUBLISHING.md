@@ -97,4 +97,4 @@ Ready to upload:
 
 3. Update the README to link to PyPI page
 
-Good luck! 🚀
+Good luck.

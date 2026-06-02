@@ -1,6 +1,6 @@
 # Checklist: Getting Guaro on PyPI (pip install guaro)
 
-## ✅ What's Done
+## Completed Items
 
 - [x] Package structure configured (`pyproject.toml`)
 - [x] Repository links updated to https://github.com/Alazar42/Guaro
@@ -10,7 +10,7 @@
 - [x] Twine verified both distributions pass validation
 - [x] GitHub Actions workflow ready (`.github/workflows/publish.yml`)
 
-## 📋 Next Steps
+## Next Steps
 
 ### Step 1: Create PyPI Account (One-time)
 - [ ] Register at https://pypi.org/account/register/
@@ -60,7 +60,7 @@ git push origin v0.1.0
 # Then go to: https://github.com/Alazar42/Guaro/releases/new
 ```
 
-## 🎯 Final Result
+## Final Result
 
 After following these steps, anyone will be able to:
 
@@ -70,7 +70,7 @@ pip install "guaro[postgres]"
 pip install "guaro[all-databases]"
 ```
 
-## 📚 Documentation
+## Documentation
 
 - **PYPI_PUBLISHING.md** - Detailed step-by-step guide
 - **PUBLISH.md** - Advanced publishing documentation
@@ -78,4 +78,4 @@ pip install "guaro[all-databases]"
 
 ---
 
-**The package is built and ready to upload. You just need your PyPI account!** 🚀
+The package is built and ready to upload. You only need a PyPI account.

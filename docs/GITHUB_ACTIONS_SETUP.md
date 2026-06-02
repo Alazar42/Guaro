@@ -30,14 +30,14 @@ Before the workflows can publish to PyPI, you need to configure GitHub trusted p
 4. Create or select an environment named `pypi`
 5. Save it; no secret is required for trusted publishing
 
-That's it! ✅
+That completes the setup.
 
 ## Verify It Works
 
 ### Test 1: Check Secret is Stored
 
 1. Go to Settings → Secrets and variables → Actions
-2. You should see `pypi` listed
+2. You should see `pypi` listed.
 
 ### Test 2: Manual Workflow Trigger
 
@@ -73,11 +73,11 @@ ${{ github.run_id }}        # unique run ID
 ${{ github.event_name }}    # release or workflow_dispatch
 ```
 
-Trusted publishing is:
-- ✅ Hidden in logs
-- ✅ Encrypted at rest
-- ✅ Only accessible in workflows
-- ✅ Visible only to creators
+Trusted publishing has the following properties:
+- Hidden in logs
+- Encrypted at rest
+- Only accessible in workflows
+- Visible only to creators
 
 ## Troubleshooting
 
@@ -106,17 +106,17 @@ Your workflows should look like:
 ```
 .github/
 ├── workflows/
-│   ├── ci.yml         ✅ Tests on every push
-│   └── workflow.yml   ✅ Publishes on release
+│   ├── ci.yml         Tests on every push
+│   └── workflow.yml   Publishes on release
 ```
 
 ## Next Steps
 
-1. ✅ Create PyPI Account
-2. ✅ Add Trusted Publisher on PyPI
-3. ✅ Configure GitHub Environment `pypi`
-4. ✅ Create a release to test
-5. ✅ Verify `pip install guaro` works
+1. Create a PyPI account.
+2. Add a trusted publisher on PyPI.
+3. Configure the GitHub environment `pypi`.
+4. Create a release to test.
+5. Verify `pip install guaro` works.
 
 ## Security Notes
 
@@ -134,4 +134,4 @@ Your workflows should look like:
 
 ---
 
-Ready? Go to https://pypi.org/manage/account/publishing/ and add the trusted publisher! 🚀
+Go to https://pypi.org/manage/account/publishing/ and add the trusted publisher.

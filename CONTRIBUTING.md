@@ -1,6 +1,6 @@
 # Contributing to Guaro
 
-Thanks for your interest in contributing to Guaro! This document provides guidelines for contributing.
+This document provides guidelines for contributing to Guaro.
 
 ## Getting Started
 
@@ -359,4 +359,4 @@ A: Get feedback and iterate! Most PRs have feedback before merging.
 
 ## Thank You!
 
-Thanks for contributing to Guaro! 🙏
+Thank you for contributing to Guaro.

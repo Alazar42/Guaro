@@ -5,19 +5,19 @@
 
 A powerful, async-first Python framework for building REST & GraphQL APIs with automatic schema management, dependency injection, and type-safe data validation.
 
-## ✨ Features
+## Features
 
-- **🚀 Async-First**: Built on Starlette for high-performance async request handling
-- **🔄 Multi-Protocol**: REST and GraphQL support out of the box
-- **📊 Database Agnostic**: SQLite, PostgreSQL, MySQL, MongoDB support with intelligent schema management
-- **✅ Auto-Migrate**: Smart schema updates that preserve data (never loses existing data)
-- **🔗 Relations**: Built-in support for complex relationships and nested queries
-- **💉 Dependency Injection**: Clean dependency resolution for handlers and middleware
-- **🛡️ Type Safe**: Full type hints for better IDE support and developer experience
-- **📝 Auto Documentation**: Automatic OpenAPI/Swagger generation
-- **🔐 Middleware & Auth**: Built-in middleware support for authentication & permissions
+- **Async-first**: Built on Starlette for high-performance async request handling
+- **Multi-protocol**: REST and GraphQL support out of the box
+- **Database-agnostic**: SQLite, PostgreSQL, MySQL, and MongoDB support with schema management
+- **Auto-migrate**: Schema updates that preserve existing data
+- **Relations**: Support for complex relationships and nested queries
+- **Dependency injection**: Dependency resolution for handlers and middleware
+- **Type-safe**: Full type hints for improved IDE support and developer experience
+- **Auto documentation**: Automatic OpenAPI/Swagger generation
+- **Middleware and authentication**: Built-in middleware support for authentication and permissions
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     api.run(mode="hybrid")  # REST + GraphQL
 ```
 
-## 📚 Documentation
+## Documentation
 
 Full documentation available at [docs/README.md](docs/README.md) with learning paths and guides:
 
@@ -112,7 +112,7 @@ Full documentation available at [docs/README.md](docs/README.md) with learning p
 - **[Publishing Guide](PUBLISH.md)** - Deploying to PyPI
 - **[Changelog](CHANGELOG.md)** - Version history and roadmap
 
-## 🛠️ To Get Started
+## To Get Started
 
 1. **Users**: Follow the [Installation & Setup](docs/INSTALLATION.md) guide
 2. **Developers**: See [Development Setup](DEVELOPMENT_SETUP.md) for cloning and local setup

@@ -312,4 +312,4 @@ python test_local.py
 
 ---
 
-Happy coding! 🚀
+Happy coding.
