@@ -45,14 +45,14 @@ class API:
         if mode == "rest":
             try:
                 self._attach_lifecycle(rest_app)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning(f"[Guaro] Failed to attach lifecycle handlers to REST app: {exc}")
             return rest_app
         if mode == "graphql":
             try:
                 self._attach_lifecycle(graphql_app)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning(f"[Guaro] Failed to attach lifecycle handlers to GraphQL app: {exc}")
             return graphql_app
         if mode != "hybrid":
             raise ValueError("mode must be 'rest', 'graphql', or 'hybrid'")
@@ -98,8 +98,8 @@ class API:
         ])
         try:
             self._attach_lifecycle(app)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning(f"[Guaro] Failed to attach lifecycle handlers to hybrid app: {exc}")
         return app
 
     def _attach_lifecycle(self, app: Any) -> None:
