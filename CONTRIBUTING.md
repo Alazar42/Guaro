@@ -5,7 +5,7 @@ Thanks for your interest in contributing to Guaro! This document provides guidel
 ## Getting Started
 
 1. **Fork the repository** on GitHub
-2. **Clone your fork** locally: `git clone https://github.com/YOUR_USERNAME/guaro.git`
+2. **Clone your fork** locally: `git clone https://github.com/Alazar42/Guaro.git`
 3. **Set up development environment** - See [Development Guide](docs/DEVELOPMENT.md)
 4. **Create a branch** for your feature: `git checkout -b feature/my-feature`
 
