@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import logging
 from typing import Any, ClassVar
 
 from guaro.core.registry import Registry
 from guaro.db.router import get_adapter
+
+
+logger = logging.getLogger("guaro.models.base")
 
 
 class Model:
@@ -26,6 +30,7 @@ class Model:
     @classmethod
     def _metadata(cls):
         return cls._registry().get_model_metadata(cls)
+
     @classmethod
     async def all(cls) -> list[Model]:
         registry = cls._registry()
@@ -69,8 +74,8 @@ class Model:
         if hasattr(created, "__dict__") and created.__class__ is not cls:
             try:
                 created.bind_registry(registry)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug(f"[Guaro] Failed to bind registry to created model: {exc}")
             return created
         if isinstance(created, dict):
             inst = cls(**created)
@@ -97,8 +102,8 @@ class Model:
             if hasattr(created, "__dict__"):
                 try:
                     created.bind_registry(registry)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug(f"[Guaro] Failed to bind registry to created model instance: {exc}")
                 return created
             if isinstance(created, dict):
                 inst = cls(**created)
@@ -112,8 +117,8 @@ class Model:
         if hasattr(updated, "__dict__"):
             try:
                 updated.bind_registry(registry)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug(f"[Guaro] Failed to bind registry to updated model instance: {exc}")
             return updated
         return instance
 
@@ -171,8 +176,8 @@ class Model:
                 inst = cls(**r)
                 try:
                     inst.bind_registry(cls.__guaro_registry__)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug(f"[Guaro] Failed to bind registry to model created from dict: {exc}")
                 models.append(inst)
                 continue
             # Fallback: try to turn into model via __dict__
@@ -180,8 +185,8 @@ class Model:
                 inst = cls(**r.__dict__)
                 try:
                     inst.bind_registry(cls.__guaro_registry__)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug(f"[Guaro] Failed to bind registry to model created from object: {exc}")
                 models.append(inst)
                 continue
         return models

@@ -5,7 +5,7 @@ Simple, fast, and async-first framework for building modern APIs with
 automatic schema migration, multi-database support, and built-in REST + GraphQL.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from guaro.app import API
 from guaro.config import DatabaseEngine, normalize_database_config

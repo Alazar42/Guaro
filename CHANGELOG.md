@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auto migrate config flag now respected
 - Silent error handling in adapter connections
 
+## [0.2.0] - 2026-06-02
+- Prepare release 0.2.0: package metadata bump and minor fixes.
+- Updated security handling and logging improvements.
+- Updated documentation and CI configuration.
+
 ## [Roadmap]
 
 ### Planned for v0.2.0
