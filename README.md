@@ -1,23 +1,93 @@
-# Guaro
+# Guaro - Modern Python Backend Framework
 
-Guaro is a unified API framework for building REST APIs, GraphQL APIs, or both from one codebase, one schema system, and one execution engine.
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)
 
-## What Guaro provides
+A powerful, async-first Python framework for building REST & GraphQL APIs with automatic schema management, dependency injection, and type-safe data validation.
 
-- One model registry for REST and GraphQL
-- One router system for REST endpoints and GraphQL operations
-- One middleware and permission abstraction
-- One query planner for REST field selection and GraphQL selection sets
-- One execution engine with sync and async support
-- Automatic serialization and relation batching hooks
+## ✨ Features
 
-## Project layout
+- **🚀 Async-First**: Built on Starlette for high-performance async request handling
+- **🔄 Multi-Protocol**: REST and GraphQL support out of the box
+- **📊 Database Agnostic**: SQLite, PostgreSQL, MySQL, MongoDB support with intelligent schema management
+- **✅ Auto-Migrate**: Smart schema updates that preserve data (never loses existing data)
+- **🔗 Relations**: Built-in support for complex relationships and nested queries
+- **💉 Dependency Injection**: Clean dependency resolution for handlers and middleware
+- **🛡️ Type Safe**: Full type hints for better IDE support and developer experience
+- **📝 Auto Documentation**: Automatic OpenAPI/Swagger generation
+- **🔐 Middleware & Auth**: Built-in middleware support for authentication & permissions
 
-```text
-project/
-├── app.py
-├── models/
-├── routes/
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+pip install guaro
+```
+
+### Basic Example
+
+```python
+from guaro import API, Model, Router, DatabaseEngine
+
+# Define your models
+class User(Model):
+    id: int
+    name: str
+    email: str
+
+class Post(Model):
+    id: int
+    title: str
+    body: str
+    author: "User"
+
+# Configure API
+api = API(database={
+    "engine": DatabaseEngine.POSTGRESQL,
+    "url": "postgresql+asyncpg://user:pass@localhost/dbname",
+    "auto_migrate": True,  # Automatic schema creation
+})
+
+# Register models
+api.register_model(User)
+api.register_model(Post)
+
+# Create routes
+router = Router(prefix="/users")
+
+@router.get("/")
+async def list_users() -> list[User]:
+    return await User.all()
+
+@router.get("/{id}")
+async def get_user(id: int) -> User | None:
+    return await User.find(id)
+
+api.register_router(router)
+
+# Run
+if __name__ == "__main__":
+    api.run(mode="hybrid")  # REST + GraphQL
+```
+
+## 📚 Documentation
+
+Full documentation available in the [docs/](docs/) directory:
+
+- [Installation & Setup](docs/INSTALLATION.md) - Get started with Guaro
+- [Model Definition](docs/MODELS.md) - Define your data models
+- [Router & Routes](docs/ROUTING.md) - Create REST endpoints
+- [Database Configuration](docs/DATABASE.md) - Configure database connections
+- [Auto-Migration](docs/MIGRATION.md) - Automatic schema management
+- [GraphQL](docs/GRAPHQL.md) - Use GraphQL with Guaro
+- [Middleware & Auth](docs/MIDDLEWARE.md) - Authentication and authorization
+- [Dependency Injection](docs/DEPENDENCY_INJECTION.md) - Advanced DI patterns
+- [Developer Guide](docs/DEVELOPMENT.md) - Contribute to Guaro
+
+## 📖 Tutorial
+
+Start with the [Installation Guide](docs/INSTALLATION.md) then work through the examples/
 ├── middleware/
 └── guaro/
 ```

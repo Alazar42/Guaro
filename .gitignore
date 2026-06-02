@@ -47,6 +47,21 @@ venv/
 .venv/
 venv.bak/
 
+# Local development files (examples & test files)
+app.py
+config_example.py
+test_config.py
+middleware/
+models/
+routes/
+example_*.py
+test_*.db
+test_migration.db
+
+# Database test files
+*.sqlite
+*.sqlite3
+
 # PyInstaller
 *.manifest
 *.spec

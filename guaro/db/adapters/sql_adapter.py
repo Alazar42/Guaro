@@ -15,6 +15,7 @@ from sqlalchemy import (
     insert as sa_insert,
     update as sa_update,
     delete as sa_delete,
+    inspect,
 )
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 
@@ -25,7 +26,7 @@ logger = logging.getLogger("guaro.sql")
 
 PY_TYPE_MAP = {
     int: Integer,
-    str: String,
+    str: String(255),  # MySQL requires length; 255 is reasonable default
     float: Float,
     bool: Boolean,
 }
@@ -50,7 +51,14 @@ class SQLAdapter(DatabaseAdapter):
             cols = []
             for fname, fmeta in meta.fields.items():
                 py_type = fmeta.annotation
-                col_type = PY_TYPE_MAP.get(py_type, String)
+                # Skip relation fields (lists, complex types, etc.)
+                if hasattr(py_type, '__origin__'):  # Handle generic types like list[Post]
+                    continue
+                if py_type not in PY_TYPE_MAP:
+                    # Unknown type, likely a relation or complex type - skip it
+                    continue
+                
+                col_type = PY_TYPE_MAP.get(py_type, String(255))
                 # assume 'id' is primary key
                 if fname == meta.primary_key:
                     cols.append(Column(fname, col_type, primary_key=True))
@@ -60,10 +68,29 @@ class SQLAdapter(DatabaseAdapter):
             self.tables[name] = tbl
 
     async def connect(self) -> None:
-        # create tables if not exist
-        async with self.engine.begin() as conn:
-            await conn.run_sync(self.metadata.create_all)
-        logger.debug("[Guaro SQL] Connected and ensured tables exist")
+        # Check if auto_migrate is enabled before creating/updating tables
+        cfg = getattr(self.registry, "db_config", None)
+        auto_migrate = getattr(cfg, "auto_migrate", True) if cfg else True
+        
+        if auto_migrate:
+            # Use SQLAlchemy's smart create_all() which respects existing tables
+            # This only creates what's missing - doesn't drop or recreate existing tables
+            async with self.engine.begin() as conn:
+                # checkfirst=True ensures we only create what doesn't exist
+                await conn.run_sync(
+                    lambda c: self.metadata.create_all(c, checkfirst=True)
+                )
+            logger.debug("[Guaro SQL] Connected and schema ensured (existing data preserved)")
+        else:
+            logger.debug("[Guaro SQL] Connected (auto_migrate disabled, skipping schema updates)")
+
+    async def _apply_schema_migrations(self) -> None:
+        """Not currently used - kept for future advanced migration logic."""
+        pass
+
+    async def _migrate_existing_table(self, conn: Any, table_name: str, table: Any) -> None:
+        """Not currently used - kept for future advanced migration logic."""
+        pass
 
     async def disconnect(self) -> None:
         await self.engine.dispose()

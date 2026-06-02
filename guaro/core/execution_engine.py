@@ -11,8 +11,7 @@ from guaro.execution.pipeline import ExecutionPipeline
 from guaro.execution.planner import QueryPlan, build_query_plan
 from guaro.core.query_ir import QueryIR, RelationSelection
 from guaro.db.repository import Repository
-from guaro.db.adapters.memory_adapter import MemoryAdapter
-from guaro.config.schema import DatabaseEngine
+from guaro.db.router import get_adapter
 
 
 @dataclass(slots=True)
@@ -54,11 +53,16 @@ class ExecutionEngine:
             if model_metadata is not None and route.method == "GET":
                 # build QueryIR from selection and params
                 ir = QueryIR(entity=model_metadata.name)
-                # fields
+                # fields - exclude relations (they are not stored as db columns)
                 if context.selected_fields:
                     ir.fields = list(context.selected_fields)
                 else:
-                    ir.fields = list(model_metadata.fields.keys())
+                    # Include only scalar fields, exclude relations
+                    ir.fields = [
+                        fname
+                        for fname, fmeta in model_metadata.fields.items()
+                        if not fmeta.relationship
+                    ]
 
                 # relations from context.field_tree
                 def build_relations(tree: dict[str, Any]) -> dict[str, RelationSelection]:
@@ -78,16 +82,8 @@ class ExecutionEngine:
                     ir.add_filter(primary, "==", kwargs[primary])
                     ir.set_pagination(limit=1, offset=0)
 
-                # select adapter based on registry db_config
-                adapter = None
-                cfg = getattr(self.registry, "db_config", None)
-                if cfg is None or getattr(cfg, "engine", None) == DatabaseEngine.MEMORY:
-                    adapter = MemoryAdapter(self.registry)
-                else:
-                    # Use SQLAdapter for relational engines
-                    from guaro.db.adapters.sql_adapter import SQLAdapter
-
-                    adapter = SQLAdapter(self.registry, cfg.url)
+                # select cached adapter from database router
+                adapter = get_adapter(self.registry)
 
                 repo = Repository(adapter)
                 outcome = await repo.find(ir)

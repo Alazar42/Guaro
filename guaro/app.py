@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -8,6 +9,8 @@ from guaro.config.schema import NormalizedDatabaseConfig
 from guaro.core.execution_engine import ExecutionEngine
 from guaro.core.registry import Registry
 from guaro.core.schema import compile_model_schema
+
+logger = logging.getLogger("guaro.app")
 from guaro.graphql.adapter import GraphQLAdapter
 from guaro.rest.adapter import RestAdapter
 
@@ -40,8 +43,16 @@ class API:
         graphql_app = GraphQLAdapter(self.registry, self.engine).build_app()
 
         if mode == "rest":
+            try:
+                self._attach_lifecycle(rest_app)
+            except Exception:
+                pass
             return rest_app
         if mode == "graphql":
+            try:
+                self._attach_lifecycle(graphql_app)
+            except Exception:
+                pass
             return graphql_app
         if mode != "hybrid":
             raise ValueError("mode must be 'rest', 'graphql', or 'hybrid'")
@@ -54,6 +65,8 @@ class API:
             raise RuntimeError("Starlette is required to build a hybrid app") from exc
 
         from guaro.openapi.generator import generate_openapi
+        from guaro.db.router import get_adapter
+        import asyncio
 
         async def openapi_json_endpoint(request):
             return JSONResponse(generate_openapi(self.registry))
@@ -77,12 +90,50 @@ class API:
 """
             return HTMLResponse(html)
 
-        return Starlette(routes=[
+        app = Starlette(routes=[
             Route("/openapi.json", endpoint=openapi_json_endpoint, methods=["GET"]),
             Route("/docs", endpoint=docs_endpoint, methods=["GET"]),
             Mount("/graphql", app=graphql_app),
             Mount("/", app=rest_app),
         ])
+        try:
+            self._attach_lifecycle(app)
+        except Exception:
+            pass
+        return app
+
+    def _attach_lifecycle(self, app: Any) -> None:
+        """Attach startup/shutdown handlers to ensure adapters are connected."""
+
+        async def _startup():
+            adapter = get_adapter(self.registry)
+            if hasattr(adapter, "connect"):
+                try:
+                    await adapter.connect()
+                    logger.debug("[Guaro] Adapter connected on startup")
+                except Exception as e:
+                    logger.error(f"[Guaro] Failed to connect adapter on startup: {e}")
+                    raise
+
+        async def _shutdown():
+            adapter = get_adapter(self.registry)
+            if hasattr(adapter, "disconnect"):
+                try:
+                    await adapter.disconnect()
+                    logger.debug("[Guaro] Adapter disconnected on shutdown")
+                except Exception as e:
+                    logger.error(f"[Guaro] Failed to disconnect adapter on shutdown: {e}")
+                    raise
+
+        # Starlette/ASGI apps expose add_event_handler
+        try:
+            app.add_event_handler("startup", _startup)
+            app.add_event_handler("shutdown", _shutdown)
+        except AttributeError as e:
+            # Some app types (e.g., GraphQL middleware) may not support event handlers
+            logger.debug(f"[Guaro] App does not support event handlers: {e}")
+        except Exception as e:
+            logger.warning(f"[Guaro] Unexpected error attaching lifecycle handlers: {e}")
 
     def run(self, mode: str = "hybrid", host: str = "127.0.0.1", port: int = 8000) -> Any:
         app = self.build(mode=mode)

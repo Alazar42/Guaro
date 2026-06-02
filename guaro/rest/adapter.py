@@ -48,6 +48,16 @@ class RestAdapter:
                 return json_response(result.data)
             except PermissionError as exc:
                 return json_response({"detail": str(exc)}, status_code=401)
+            except Exception as exc:
+                # Graceful, user-facing error without traceback leakage.
+                return json_response(
+                    {
+                        "detail": "Request failed",
+                        "error": str(exc),
+                        "route": route.path,
+                    },
+                    status_code=500,
+                )
 
         return handler
 

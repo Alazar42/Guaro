@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from urllib.parse import quote_plus
 from typing import Any
 
 from guaro.config.schema import DatabaseEngine, NormalizedDatabaseConfig
@@ -31,6 +32,76 @@ def _infer_engine_from_url(url: str) -> DatabaseEngine:
     }
 
     return engine_map.get(scheme, DatabaseEngine.SQLITE)
+
+
+def _coerce_engine(engine: Any) -> DatabaseEngine:
+    if isinstance(engine, DatabaseEngine):
+        return engine
+    if isinstance(engine, str):
+        try:
+            return DatabaseEngine(engine.lower())
+        except ValueError as exc:
+            raise ValueError(f"Unknown engine: {engine}") from exc
+    raise ValueError(f"engine must be DatabaseEngine or string; got {type(engine)}")
+
+
+def _build_url_from_parts(config: dict[str, Any], engine: DatabaseEngine) -> str:
+    """Build a DB URL from host credentials when `url` is not provided."""
+    host = config.get("host")
+    database = config.get("database_name") or config.get("database") or config.get("db")
+    user = config.get("user") or config.get("username")
+    password = config.get("password")
+    port = config.get("port")
+
+    if engine == DatabaseEngine.MEMORY:
+        return "memory://"
+
+    if engine == DatabaseEngine.SQLITE:
+        # For sqlite, allow a file path via database_name/database
+        db_file = database or "guaro.db"
+        return f"sqlite+aiosqlite:///{db_file}"
+
+    if engine == DatabaseEngine.MONGODB:
+        if not host:
+            raise ValueError("MongoDB config requires 'host' when 'url' is missing")
+        auth = ""
+        if user:
+            encoded_user = quote_plus(str(user))
+            encoded_password = quote_plus(str(password or ""))
+            auth = f"{encoded_user}:{encoded_password}@"
+        host_port = f"{host}:{port}" if port else str(host)
+        db_segment = f"/{database}" if database else ""
+        return f"mongodb://{auth}{host_port}{db_segment}"
+
+    # SQL engines
+    if engine == DatabaseEngine.POSTGRESQL:
+        driver = "postgresql+asyncpg"
+        default_port = 5432
+    elif engine == DatabaseEngine.MYSQL:
+        driver = "mysql+aiomysql"
+        default_port = 3306
+    else:
+        raise ValueError(f"Unsupported engine for URL construction: {engine}")
+
+    missing = [
+        key
+        for key, value in {
+            "host": host,
+            "database_name|database": database,
+            "user|username": user,
+            "password": password,
+        }.items()
+        if not value
+    ]
+    if missing:
+        raise ValueError(
+            "Database config missing required fields when 'url' is omitted: " + ", ".join(missing)
+        )
+
+    encoded_user = quote_plus(str(user))
+    encoded_password = quote_plus(str(password))
+    host_port = f"{host}:{port or default_port}"
+    return f"{driver}://{encoded_user}:{encoded_password}@{host_port}/{database}"
 
 
 def normalize_database_config(config: Any | None = None) -> NormalizedDatabaseConfig:
@@ -77,21 +148,18 @@ def normalize_database_config(config: Any | None = None) -> NormalizedDatabaseCo
     # Dictionary
     if isinstance(config, dict):
         url = config.get("url")
-        if not url:
-            raise ValueError("Database config dict must include 'url' field")
 
-        # Determine engine: explicit > inferred from URL
-        if "engine" in config:
-            engine = config["engine"]
-            if isinstance(engine, str):
-                try:
-                    engine = DatabaseEngine(engine)
-                except ValueError:
-                    raise ValueError(f"Unknown engine: {engine}")
-            elif not isinstance(engine, DatabaseEngine):
-                raise ValueError(f"engine must be DatabaseEngine or string; got {type(engine)}")
-        else:
+        # Determine engine: explicit > inferred from URL > default memory fallback
+        if "engine" in config and config.get("engine") is not None:
+            engine = _coerce_engine(config.get("engine"))
+        elif url:
             engine = _infer_engine_from_url(url)
+        else:
+            engine = DatabaseEngine.MEMORY
+
+        # Build URL from host-based fields when URL is missing
+        if not url:
+            url = _build_url_from_parts(config, engine)
 
         return NormalizedDatabaseConfig(
             url=url,
