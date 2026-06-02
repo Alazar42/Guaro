@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "guaro"
+version = "0.1.0"
+description = "Guaro is a unified REST + GraphQL API framework built on one registry and one execution engine."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "starlette>=0.37",
+  "strawberry-graphql>=0.245",
+  "uvicorn>=0.30",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+include = ["guaro*"]
+
