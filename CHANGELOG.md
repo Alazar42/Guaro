@@ -74,4 +74,4 @@ Guaro follows [Semantic Versioning](https://semver.org/):
 
 - [Contributing Guide](CONTRIBUTING.md) - How to contribute
 - [Development Guide](docs/DEVELOPMENT.md) - Internal architecture
-- [GitHub Releases](https://github.com/MickyCodes/guaro/releases) - Release notes
+- [GitHub Releases](https://github.com/Alazar42/Guaro/releases) - Release notes

@@ -14,7 +14,7 @@ This guide is for developers contributing to Guaro itself, not using Guaro in pr
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/MickyCodes/guaro.git
+git clone https://github.com/Alazar42/Guaro.git
 cd guaro
 ```
 
